@@ -1,0 +1,34 @@
+<idea-plugin>
+  <id>net.objecthunter.idea.BuilderGenerator</id>
+  <name>Simple Builder Generator Plugin</name>
+  <version>1.0</version>
+  <vendor email="frank.asseg@objecthunter.net" url="http://www.objecthunter.net">Frank Asseg Freelance Software Development</vendor>
+
+  <description><![CDATA[
+      Simple Builder Pattern generator plugin.
+    ]]></description>
+
+  <change-notes><![CDATA[
+    Initial release.
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="145.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <action class="net.objecthunter.idea.GenerateBuilderAction" id="GenerateGroup.BuilderGenerator" text="Generate builder" description="Generate a static inner Builder" >
+      <add-to-group group-id="JavaGenerateGroup1" />
+    </action>
+  </actions>
+</idea-plugin>
