@@ -28,7 +28,7 @@ public class GenerateBuilderAction extends AnAction {
         new WriteCommandAction.Simple(clazz.getProject(), clazz.getContainingFile()) {
             @Override
             protected void run() throws Throwable {
-                final BuilderCodeGenerator generator = new BuilderCodeGenerator(clazz);
+                final BuilderCodeGenerator generator = new BuilderCodeGenerator(clazz, BuilderPersistentState.getInstance(anActionEvent.getProject()));
                 generator.generateBuilder();
             }
         }.execute();

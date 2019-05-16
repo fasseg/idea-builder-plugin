@@ -1,15 +1,16 @@
 <idea-plugin>
   <id>net.objecthunter.idea.BuilderGenerator</id>
-  <name>Simple Builder Generator Plugin</name>
-  <version>1.0</version>
+  <name>Simple Builder Generator</name>
+  <version>1.1</version>
   <vendor email="frank.asseg@objecthunter.net" url="http://www.objecthunter.net">Frank Asseg Freelance Software Development</vendor>
 
   <description><![CDATA[
-      Simple Builder Pattern generator plugin.
+      This plugin creates static inner Builders, as proposed in Josh Bloch's Book 'Effective Java'
     ]]></description>
 
   <change-notes><![CDATA[
-    Initial release.
+    <p>Version 1.0: Initial release.</p>
+    <p>Version 1.1: Added configuration options.</p>
     ]]>
   </change-notes>
 
@@ -23,7 +24,8 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
+    <projectConfigurable groupId="tools" displayName="Simple Builder Generator Plugin" id="settings.BuilderGenerator" instance="net.objecthunter.idea.BuilderConfiguration" />
+    <projectService serviceInterface="net.objecthunter.idea.BuilderPersistentState" serviceImplementation="net.objecthunter.idea.BuilderPersistentState"/>
   </extensions>
 
   <actions>

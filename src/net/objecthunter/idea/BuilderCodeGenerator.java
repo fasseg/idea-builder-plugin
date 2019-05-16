@@ -2,6 +2,7 @@ package net.objecthunter.idea;
 
 import com.intellij.psi.*;
 import com.intellij.psi.javadoc.PsiDocComment;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +22,14 @@ public class BuilderCodeGenerator {
     private static final String builderClassName = "Builder";
 
     private static final String builderParamName = builderClassName.toLowerCase();
-
-    public BuilderCodeGenerator(final PsiClass clazz) {
+    
+    private final BuilderPersistentState persistentState;
+    
+    public BuilderCodeGenerator(final PsiClass clazz, final BuilderPersistentState persistentState) {
         this.clazz = clazz;
         this.elementFactory = JavaPsiFacade.getElementFactory(clazz.getProject());
         this.fields = getFinalFieldsFromClass(clazz);
+        this.persistentState = persistentState;
     }
 
     private static List<PsiField> getFinalFieldsFromClass(PsiClass clazz) {
@@ -169,7 +173,7 @@ public class BuilderCodeGenerator {
     private List<PsiMethod> createBuilderMethods(final PsiType builderType) {
         final List<PsiMethod> methods = new ArrayList<>();
         for (final PsiField field : fields) {
-            final PsiMethod method = elementFactory.createMethod(field.getName(), builderType);
+            final PsiMethod method = elementFactory.createMethod(this.createMethodName(field.getName()), builderType);
             final PsiParameter param = elementFactory.createParameter(field.getName(), field.getType());
             param.getModifierList().setModifierProperty(PsiModifier.FINAL, true);
             method.getParameterList().add(param);
@@ -183,5 +187,14 @@ public class BuilderCodeGenerator {
         methods.add(buildMethod);
         return methods;
     }
-
+    
+    private String createMethodName(final String name) {
+        final String prefix = this.persistentState.getMethodPrefix();
+        if (StringUtils.isEmpty(prefix)) {
+            return name;
+        } else {
+            return prefix + name.substring(0,1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
+        }
+    }
+    
 }
