@@ -54,6 +54,8 @@ public class BuilderConfiguration implements SearchableConfigurable {
     @Override
     public void apply() throws ConfigurationException {
         this.persistentState.setMethodPrefix(this.configurationUI.getMethodPrefix());
+        this.persistentState.setConsiderFinalFieldsOnly(this.configurationUI.isConsiderFinalFieldsOnly());
+        this.persistentState.setCreateStaticBuilderMethod(this.configurationUI.isCreateStaticBuilderMethod());
     }
     
     @Override

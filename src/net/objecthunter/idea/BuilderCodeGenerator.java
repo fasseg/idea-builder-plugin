@@ -23,19 +23,22 @@ public class BuilderCodeGenerator {
 
     private static final String builderParamName = builderClassName.toLowerCase();
     
+    /* The builder configuration is stored in the persistent state instance */
     private final BuilderPersistentState persistentState;
     
     public BuilderCodeGenerator(final PsiClass clazz, final BuilderPersistentState persistentState) {
         this.clazz = clazz;
         this.elementFactory = JavaPsiFacade.getElementFactory(clazz.getProject());
-        this.fields = getFinalFieldsFromClass(clazz);
         this.persistentState = persistentState;
+        this.fields = getFieldsFromClass(clazz, this.persistentState.isConsiderFinalFieldsOnly());
     }
 
-    private static List<PsiField> getFinalFieldsFromClass(PsiClass clazz) {
+    private static List<PsiField> getFieldsFromClass(final PsiClass clazz, final boolean finalOnly) {
         final List<PsiField> fields = new ArrayList<>();
         for (final PsiField field : clazz.getAllFields()) {
             if (field.getModifierList().hasExplicitModifier(PsiModifier.FINAL)) {
+                fields.add(field);
+            } else if (!finalOnly) {
                 fields.add(field);
             }
         }
@@ -79,11 +82,16 @@ public class BuilderCodeGenerator {
         /* create a new builder class that will be added to the parent class */
         final PsiClass builderClass = createBuilderClass();
 
-        /* add Javadoc to the buidler class */
+        /* add Javadoc to the builder class */
         builderClass.addBefore(createBuilderJavaDoc(), builderClass.getFirstChild());
 
-        final PsiMethod constructor = createConstructor(builderClass);
-        this.clazz.add(constructor);
+        /* Add a constructor to the target class */
+        this.clazz.add(createConstructor(builderClass));
+        
+        /* Create a static method returning the builder in the static class */
+        if (this.persistentState.isCreateStaticBuilderMethod()) {
+            this.clazz.add(this.createStaticBuilderMethod());
+        }
 
         /* add Javadoc to the builder methods */
         for (final PsiMethod method : builderClass.getMethods()) {
@@ -92,7 +100,15 @@ public class BuilderCodeGenerator {
 
         this.clazz.add(builderClass);
     }
-
+    
+    private PsiElement createStaticBuilderMethod() {
+        final PsiMethod staticBuilderMethod = elementFactory.createMethod("builder", elementFactory.createType(elementFactory.createClass(this.builderClassName)));
+        staticBuilderMethod.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
+        staticBuilderMethod.getModifierList().setModifierProperty(PsiModifier.STATIC, true);
+        staticBuilderMethod.getBody().add(elementFactory.createStatementFromText("return new Builder();", null));
+        return staticBuilderMethod;
+    }
+    
     private PsiMethod createConstructor(final PsiClass builderClass) {
         final PsiMethod constructor = elementFactory.createConstructor();
         constructor.getParameterList().add(elementFactory.createParameter(builderParamName, elementFactory.createType(builderClass)));
@@ -151,7 +167,7 @@ public class BuilderCodeGenerator {
         }else {
             comment.append("/**\n")
                     .append(" * Set the value of the field ")
-                    .append(method.getName())
+                    .append(this.inferFieldName(method.getName()))
                     .append(" of the target instance of type {@link ")
                     .append(this.clazz.getQualifiedName())
                     .append("}\n */\n");
@@ -159,7 +175,16 @@ public class BuilderCodeGenerator {
         return elementFactory.createDocCommentFromText(comment.toString());
 
     }
-
+    
+    private String inferFieldName(final String methodName) {
+        if (StringUtils.isEmpty(this.persistentState.getMethodPrefix())) {
+            return methodName;
+        }
+        String inferredName = methodName.substring(this.persistentState.getMethodPrefix().length());
+        inferredName = inferredName.substring(0,1).toLowerCase() + (inferredName.length() > 1 ? inferredName.substring(1) : "");
+        return inferredName;
+    }
+    
     private List<PsiField> createBuilderFields() {
         final List<PsiField> builderFields = new ArrayList<>();
         for (final PsiField field : fields) {

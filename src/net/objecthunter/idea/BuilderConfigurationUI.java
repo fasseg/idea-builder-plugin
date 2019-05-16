@@ -1,47 +1,23 @@
 package net.objecthunter.idea;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 public class BuilderConfigurationUI {
-    
-    private static final String PREFIX_HINT = "Builder methods will be called \"{}\"";
     
     private JTextField fieldPrefix;
     
     private JPanel rootPanel;
     
-    private JLabel labelMethodPrefixHint;
+    private JCheckBox checkBoxFinalFieldsOnly;
+    
+    private JCheckBox checkBoxCreateStaticBuilderMethod;
     
     private BuilderPersistentState persistentState;
     
     public BuilderConfigurationUI(final BuilderPersistentState persistentState) {
         this.persistentState = persistentState;
         this.setMethodPrefix(persistentState.getMethodPrefix());
-        this.fieldPrefix.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(final DocumentEvent documentEvent) {
-                updateMethodPrefixHint();
-            }
-    
-            @Override
-            public void removeUpdate(final DocumentEvent documentEvent) {
-                updateMethodPrefixHint();
-            }
-    
-            @Override
-            public void changedUpdate(final DocumentEvent documentEvent) {
-                updateMethodPrefixHint();
-            }
-        });
-    }
-    
-    private void updateMethodPrefixHint() {
-        final String prefix = this.fieldPrefix.getText();
-        this.labelMethodPrefixHint.setText(PREFIX_HINT.replace("{}", StringUtils.isEmpty(prefix) ? "foo(T t)" : prefix + "Foo(T t)"));
+        this.setConsiderFinalFieldsOnly(persistentState.isConsiderFinalFieldsOnly());
     }
     
     public JPanel getRootPanel() {
@@ -54,14 +30,29 @@ public class BuilderConfigurationUI {
     
     public void setMethodPrefix(final String prefix) {
         this.fieldPrefix.setText(prefix);
-        this.updateMethodPrefixHint();
+    }
+    
+    public void setConsiderFinalFieldsOnly(final boolean considerFinalFieldsOnly) {
+        this.checkBoxFinalFieldsOnly.setSelected(considerFinalFieldsOnly);
     }
     
     public boolean isModified() {
-        return !this.persistentState.getMethodPrefix().equals(this.fieldPrefix.getText());
+        return !this.persistentState.getMethodPrefix().equals(this.fieldPrefix.getText()) ||
+                this.persistentState.isConsiderFinalFieldsOnly() != this.checkBoxFinalFieldsOnly.isSelected() ||
+                this.persistentState.isCreateStaticBuilderMethod() != this.checkBoxCreateStaticBuilderMethod.isSelected();
+                
     }
     
     public void reset() {
         this.setMethodPrefix(this.persistentState.getMethodPrefix());
+        this.checkBoxFinalFieldsOnly.setSelected(this.persistentState.isConsiderFinalFieldsOnly());
+    }
+    
+    public boolean isConsiderFinalFieldsOnly() {
+        return this.checkBoxFinalFieldsOnly.isSelected();
+    }
+    
+    public boolean isCreateStaticBuilderMethod() {
+        return this.checkBoxCreateStaticBuilderMethod.isSelected();
     }
 }

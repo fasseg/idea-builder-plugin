@@ -14,6 +14,10 @@ public class BuilderPersistentState implements PersistentStateComponent<BuilderP
 
     private String methodPrefix;
     
+    private boolean considerFinalFieldsOnly;
+    
+    private boolean createStaticBuilderMethod;
+    
     @Nullable
     @Override
     public BuilderPersistentState getState() {
@@ -38,5 +42,21 @@ public class BuilderPersistentState implements PersistentStateComponent<BuilderP
     
     public void setMethodPrefix(final String methodPrefix) {
         this.methodPrefix = methodPrefix;
+    }
+    
+    public boolean isConsiderFinalFieldsOnly() {
+        return considerFinalFieldsOnly;
+    }
+    
+    public void setConsiderFinalFieldsOnly(final boolean considerFinalFieldsOnly) {
+        this.considerFinalFieldsOnly = considerFinalFieldsOnly;
+    }
+    
+    public boolean isCreateStaticBuilderMethod() {
+        return createStaticBuilderMethod;
+    }
+    
+    public void setCreateStaticBuilderMethod(final boolean createStaticBuilderMethod) {
+        this.createStaticBuilderMethod = createStaticBuilderMethod;
     }
 }
